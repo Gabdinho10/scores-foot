@@ -69,7 +69,7 @@ select{width:100%;padding:11px;border-radius:10px;border:1px solid #454545;backg
 </style>
 </head>
 <body>
-<header><h1>⚽ Scores Foot <small style="font-size:11px;color:#a8a8a8;font-weight:400">v18</small></h1><button class="gear" onclick="askKey()">⚙️</button></header>
+<header><h1>⚽ Scores Foot <small style="font-size:11px;color:#a8a8a8;font-weight:400">v19</small></h1><button class="gear" onclick="askKey()">⚙️</button></header>
 <div id="qt" style="font-size:11px;color:#a8a8a8;padding:0 14px"></div>
 <div id="ch"></div>
 <div id="dn" class="dn"></div>
@@ -77,6 +77,7 @@ select{width:100%;padding:11px;border-radius:10px;border:1px solid #454545;backg
 <div id="v"></div>
 <div id="det"></div><div id="tm"></div><div id="pp"></div>
 <div class="tabs"><button id="t_results" onclick="go('results')">⚽ Matchs</button><button id="t_live" onclick="go('live')">🔴 Direct</button><button id="t_explore" onclick="go('explore')">🔍 Explorer</button><button id="t_fav" onclick="go('fav')">⭐ Favoris</button></div>
+<script src="ucl.js"></script>
 <script>
 var DEFAULT_KEY="";
 var BASE="https://v3.football.api-sports.io",TZ=Intl.DateTimeFormat().resolvedOptions().timeZone||"UTC";
@@ -214,7 +215,7 @@ async function seasonView(){
  var id=lgf; if(id=="all")return;
  $("dn").innerHTML="";$("fl").innerHTML="";$("v").innerHTML='<div class="msg">Chargement du calendrier…</div>';
  try{
-  var r=useFD()?await fdMatches():await api("fixtures",{league:id,season:SEAS[id],timezone:TZ},300000);
+  var r=(String(id)=="2"&&typeof UCL!="undefined")?uclMatches():useFD()?await fdMatches():await api("fixtures",{league:id,season:SEAS[id],timezone:TZ},300000);
   r.sort(function(a,b){return a.fixture.timestamp-b.fixture.timestamp});
   var rounds=[],now=Date.now()/1000,cur=-1;
   r.forEach(function(f){F[f.fixture.id]=f;if(rounds.indexOf(f.league.round)<0)rounds.push(f.league.round)});
@@ -399,6 +400,15 @@ async function fdScorers(){
   var L=j.scorers.map(function(s){return{player:{name:s.player.name,photo:s.team.crest},statistics:[{team:{name:s.team.shortName||s.team.name,logo:s.team.crest},games:{appearences:s.playedMatches},goals:{total:s.goals,assists:s.assists}}]}});
   $("v").innerHTML=BACK+plist("⚽ Meilleurs buteurs",L,"g")+'<div class="msg" style="font-size:11px">Source : football-data.org. Les passeurs ne sont pas disponibles avec cette source.</div>';
  }catch(e){if(FDBAD)return rankingsView();$("v").innerHTML=BACK+'<div class="msg err">'+esc(e.message)+'</div>'}
+}
+
+function uclMatches(){
+ var now=Date.now()/1000,out=[],k=0;
+ UCL.raw.forEach(function(g){g[3].split(";").forEach(function(x){
+  var p=x.split(" "),hm=p[1].split("-"),iso=g[1]+"T"+p[0]+":00"+g[2],ts=Date.parse(iso)/1000;
+  out.push({fd:true,fixture:{id:"u"+(k++),status:{short:ts<now-7200?"FT":"NS",elapsed:null},date:iso,timestamp:ts},league:{id:2,name:"Ligue des champions",round:"League Stage - "+g[0],season:2026},teams:{home:{id:-1,name:UCL.names[hm[0]],logo:UCL.logos[hm[0]]},away:{id:-1,name:UCL.names[hm[1]],logo:UCL.logos[hm[1]]}},goals:{home:null,away:null}});
+ })});
+ return out;
 }
 
 function setFlt(v){flt=v;lgf="all";render(LAST)}
