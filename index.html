@@ -69,7 +69,7 @@ select{width:100%;padding:11px;border-radius:10px;border:1px solid #454545;backg
 </style>
 </head>
 <body>
-<header><h1>⚽ Scores Foot <small style="font-size:11px;color:#a8a8a8;font-weight:400">v17</small></h1><button class="gear" onclick="askKey()">⚙️</button></header>
+<header><h1>⚽ Scores Foot <small style="font-size:11px;color:#a8a8a8;font-weight:400">v18</small></h1><button class="gear" onclick="askKey()">⚙️</button></header>
 <div id="qt" style="font-size:11px;color:#a8a8a8;padding:0 14px"></div>
 <div id="ch"></div>
 <div id="dn" class="dn"></div>
@@ -223,7 +223,7 @@ async function seasonView(){
   if(cur<0)cur=rounds.length-1;
   var h='<div style="padding:0 12px">'+(COMP?'':'<button class="btn" style="width:100%;margin:6px 0;background:#454545;color:#f0f0f0" onclick="load()">‹ Retour au jour</button>')+'<select id="sr" onchange="showRound(this.value)">'+rounds.map(function(x,i){return'<option value="'+i+'">'+esc(rt(x))+'</option>'}).join("")+'</select></div><div id="rd"></div>';
   $("v").innerHTML=h;$("sr").value=cur;showRound(cur);
- }catch(e){$("v").innerHTML='<div class="msg err">'+esc(e.message)+'</div>'}
+ }catch(e){if(FDBAD)return seasonView();$("v").innerHTML='<div class="msg err">'+esc(e.message)+'</div>'}
 }
 var ST={L:null,pre:"",mode:"all"};
 var BACK_DAY='<div style="padding:0 12px"><button class="btn" style="width:100%;margin:6px 0;background:#454545;color:#f0f0f0" onclick="load()">‹ Retour au jour</button></div>';
@@ -353,7 +353,8 @@ function drawPlayer(){
 }
 
 var FDMAP={39:"PL",40:"ELC",140:"PD",135:"SA",78:"BL1",61:"FL1",88:"DED",94:"PPL",2:"CL",71:"BSA"};
-function useFD(){return FDMAP[lgf]&&getFD()}
+var FDBAD=false;
+function useFD(){return FDMAP[lgf]&&getFD()&&!FDBAD}
 async function fd(path,params,ttl){
  var url="https://api.football-data.org/v4/"+path+(params?"?"+new URLSearchParams(params).toString():""),pk="c:"+url,h=cache[url];
  ttl=ttl||600000;
@@ -364,7 +365,7 @@ async function fd(path,params,ttl){
   if(!r.ok)throw new Error(j.message||"Erreur football-data "+r.status);
   cache[url]={t:Date.now(),d:j};try{localStorage.setItem(pk,JSON.stringify(cache[url]))}catch(x){}
   return j;
- }catch(err){if(h){STALE=true;showQ();return h.d}throw new Error("football-data.org : "+err.message)}
+ }catch(err){if(err instanceof TypeError)FDBAD=true;if(h){STALE=true;showQ();return h.d}throw new Error("football-data.org : "+err.message)}
 }
 function fdBusy(msg){$("dn").innerHTML="";$("fl").innerHTML="";$("v").innerHTML='<div class="msg">'+msg+'</div>'}
 async function fdStandings(){
@@ -379,7 +380,7 @@ async function fdStandings(){
   })};
   ST.L=L;ST.pre=BACK+'<div class="lg" style="font-size:15px;color:#e8eef4;font-weight:700"><img src="'+esc(L.logo)+'" alt="">'+esc(L.name)+'</div>';
   drawStd("all");
- }catch(e){$("v").innerHTML=BACK+'<div class="msg err">'+esc(e.message)+'</div>'}
+ }catch(e){if(FDBAD)return standingsView();$("v").innerHTML=BACK+'<div class="msg err">'+esc(e.message)+'</div>'}
 }
 async function fdMatches(){
  var j=await fd("competitions/"+FDMAP[lgf]+"/matches");
@@ -397,7 +398,7 @@ async function fdScorers(){
   var j=await fd("competitions/"+FDMAP[lgf]+"/scorers",{limit:10});
   var L=j.scorers.map(function(s){return{player:{name:s.player.name,photo:s.team.crest},statistics:[{team:{name:s.team.shortName||s.team.name,logo:s.team.crest},games:{appearences:s.playedMatches},goals:{total:s.goals,assists:s.assists}}]}});
   $("v").innerHTML=BACK+plist("⚽ Meilleurs buteurs",L,"g")+'<div class="msg" style="font-size:11px">Source : football-data.org. Les passeurs ne sont pas disponibles avec cette source.</div>';
- }catch(e){$("v").innerHTML=BACK+'<div class="msg err">'+esc(e.message)+'</div>'}
+ }catch(e){if(FDBAD)return rankingsView();$("v").innerHTML=BACK+'<div class="msg err">'+esc(e.message)+'</div>'}
 }
 
 function setFlt(v){flt=v;lgf="all";render(LAST)}
