@@ -66,10 +66,11 @@ select{width:100%;padding:11px;border-radius:10px;border:1px solid #454545;backg
 .fg{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-top:8px}.fg div{background:#2c2c2c;text-align:center;padding:6px 2px;font-size:12px}.fg img{width:26px;height:26px;object-fit:contain;display:block;margin:4px auto;background:#fff;border-radius:50%}
 .pr img.pf{width:36px;height:36px;border-radius:50%;object-fit:cover;background:#fff;flex:none}
 .stt{display:flex;justify-content:space-around;text-align:center;padding:12px 0}.stt b{display:block;font-size:20px}.stt small{color:#a8a8a8;font-size:11px}
+.t{font-size:13px;gap:6px}.t span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.sc{min-width:54px}
 </style>
 </head>
 <body>
-<header><h1>⚽ Scores Foot <small style="font-size:11px;color:#a8a8a8;font-weight:400">v21</small></h1><button class="gear" onclick="askKey()">⚙️</button></header>
+<header><h1>⚽ Scores Foot <small style="font-size:11px;color:#a8a8a8;font-weight:400">v23</small></h1><button class="gear" onclick="askKey()">⚙️</button></header>
 <div id="qt" style="font-size:11px;color:#a8a8a8;padding:0 14px"></div>
 <div id="ch"></div>
 <div id="dn" class="dn"></div>
@@ -199,7 +200,7 @@ function rowHtml(f,full){
  var lv=LIVE.indexOf(f.fixture.status.short)>=0,st=f.goals.home!==null,mid,sub;
  if(full&&!st){mid=new Date(f.fixture.date).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});sub=new Date(f.fixture.date).toLocaleDateString([],{day:"numeric",month:"short"})}
  else{mid=st?f.goals.home+" - "+f.goals.away:"vs";sub=stat(f)}
- return'<div class="m"'+(f.fd?'':' onclick="detail('+f.fixture.id+')"')+'>'+(full?'<div class="st" style="margin:0 0 4px">'+esc(rt(f.league.round))+'</div>':'')+'<div class="r"><div class="t a"><span>'+esc(f.teams.home.name)+'</span><img src="'+esc(f.teams.home.logo)+'" alt=""></div><div class="sc">'+mid+'</div><div class="t"><img src="'+esc(f.teams.away.logo)+'" alt=""><span>'+esc(f.teams.away.name)+'</span></div></div><div class="st'+(lv?" lv":"")+'">'+esc(sub)+'</div></div>';
+ return'<div class="m"'+(f.ucl?' onclick="openUcl(\''+f.fixture.id+'\')"':f.fd?'':' onclick="detail('+f.fixture.id+')"')+'>'+(full?'<div class="st" style="margin:0 0 4px">'+esc(rt(f.league.round))+'</div>':'')+'<div class="r"><div class="t a"><span>'+esc(f.teams.home.name)+'</span><img src="'+esc(f.teams.home.logo)+'" alt=""></div><div class="sc">'+mid+'</div><div class="t"><img src="'+esc(f.teams.away.logo)+'" alt=""><span>'+esc(f.teams.away.name)+'</span></div></div><div class="st'+(lv?" lv":"")+'">'+esc(sub)+'</div></div>';
 }
 var SVD={list:[],rounds:[]};
 function showRound(i){
@@ -402,11 +403,24 @@ async function fdScorers(){
  }catch(e){if(FDBAD)return rankingsView();$("v").innerHTML=BACK+'<div class="msg err">'+esc(e.message)+'</div>'}
 }
 
+var UCLM={},UCLK=["aek","arsenal","aston","atletico","dortmund","barcelona","bayern","bodo","brugge","como","fenerbahce","feyenoord","galatasaray","inter","lask","leipzig","lens","lille","liverpool","city","united","napoli","paris","porto","psv","betis","real madrid","roma","slovan","sabah","shakhtar","slavia","sporting","stuttgart","viking","villarreal"];
+function nrm(s){return String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ø/g,"o")}
+async function openUcl(uid){
+ var u=UCLM[uid];if(!u)return;
+ var d=$("det"),bk='<button class="gear" onclick="closeDet()" style="color:#5cb82e;font-size:16px">‹ Retour</button>';
+ d.style.display="block";bringTop(d);d.scrollTop=0;d.innerHTML=bk+'<div class="msg">Recherche du match…</div>';
+ try{
+  var r=await api("fixtures",{league:2,season:2026,timezone:TZ},21600000),hk=UCLK[u.hi],ak=UCLK[u.ai];
+  var f=r.filter(function(x){return Math.abs(x.fixture.timestamp-u.fixture.timestamp)<3600&&nrm(x.teams.home.name).indexOf(hk)>=0&&nrm(x.teams.away.name).indexOf(ak)>=0})[0];
+  if(f){F[f.fixture.id]=f;detail(f.fixture.id)}
+  else d.innerHTML=bk+'<div class="msg">Les détails de ce match ne sont pas encore disponibles dans API-Football.</div>';
+ }catch(e){d.innerHTML=bk+'<div class="msg err">'+esc(e.message)+'</div>'}
+}
 function uclMatches(){
  var now=Date.now()/1000,out=[],k=0;
  UCL.raw.forEach(function(g){g[3].split(";").forEach(function(x){
   var p=x.split(" "),hm=p[1].split("-"),iso=g[1]+"T"+p[0]+":00"+g[2],ts=Date.parse(iso)/1000;
-  out.push({fd:true,fixture:{id:"u"+(k++),status:{short:ts<now-7200?"FT":"NS",elapsed:null},date:iso,timestamp:ts},league:{id:2,name:"Ligue des champions",round:"League Stage - "+g[0],season:2026},teams:{home:{id:-1,name:UCL.names[hm[0]],logo:UCL.logos[hm[0]]},away:{id:-1,name:UCL.names[hm[1]],logo:UCL.logos[hm[1]]}},goals:{home:null,away:null}});
+  var o={fd:true,ucl:true,hi:+hm[0],ai:+hm[1],fixture:{id:"u"+(k++),status:{short:ts<now-7200?"FT":"NS",elapsed:null},date:iso,timestamp:ts},league:{id:2,name:"Ligue des champions",round:"League Stage - "+g[0],season:2026},teams:{home:{id:-1,name:UCL.names[hm[0]],logo:UCL.logos[hm[0]]},away:{id:-1,name:UCL.names[hm[1]],logo:UCL.logos[hm[1]]}},goals:{home:null,away:null}};UCLM[o.fixture.id]=o;out.push(o);
  })});
  return out;
 }
