@@ -26,7 +26,7 @@ h1{font-size:19px;margin:0}
 .r{display:flex;align-items:center}
 .t{flex:1;display:flex;align-items:center;gap:8px;font-weight:600;min-width:0}
 .t.a{justify-content:flex-end;text-align:right}
-.t img{width:26px;height:26px;object-fit:contain;flex:none}
+.t img{width:28px;height:28px;object-fit:contain;flex:none}
 .sc{min-width:60px;text-align:center;font-size:18px;font-weight:700}
 .st{text-align:center;font-size:12px;color:#a8a8a8;margin-top:3px}
 .st.lv{color:#ef6b5b;font-weight:700}
@@ -69,7 +69,7 @@ select{width:100%;padding:11px;border-radius:10px;border:1px solid #454545;backg
 </style>
 </head>
 <body>
-<header><h1>⚽ Scores Foot <small style="font-size:11px;color:#a8a8a8;font-weight:400">v19</small></h1><button class="gear" onclick="askKey()">⚙️</button></header>
+<header><h1>⚽ Scores Foot <small style="font-size:11px;color:#a8a8a8;font-weight:400">v21</small></h1><button class="gear" onclick="askKey()">⚙️</button></header>
 <div id="qt" style="font-size:11px;color:#a8a8a8;padding:0 14px"></div>
 <div id="ch"></div>
 <div id="dn" class="dn"></div>
@@ -110,7 +110,7 @@ async function api(path,params,ttl){
 function getFD(){try{return localStorage.getItem("fdkey")||""}catch(e){return window._fd||""}}
 function askKey(){
  $("dn").innerHTML="";
- $("v").innerHTML='<div class="msg" style="text-align:left"><b>Clé API-Football</b> (direct, détails des matchs)<input id="ki" placeholder="Clé API-Football" value="'+esc(getKey())+'" autocomplete="off"><b>Clé football-data.org</b> (facultative : classements, calendriers, buteurs sans toucher au quota)<input id="ki2" placeholder="Clé football-data.org" value="'+esc(getFD())+'" autocomplete="off"><div style="font-size:12px;margin:4px 0 10px">Les clés restent uniquement sur votre téléphone.</div><button class="btn" onclick="saveKey()">Enregistrer</button></div>';
+ $("v").innerHTML='<div class="msg" style="text-align:left"><b>Clé API-Football</b> (direct, détails des matchs)<input id="ki" placeholder="Clé API-Football" value="'+esc(getKey())+'" autocomplete="off"><b>Clé football-data.org</b> (facultative : classements, calendriers, buteurs sans toucher au quota)<input id="ki2" placeholder="Clé football-data.org" value="'+esc(getFD())+'" autocomplete="off"><div style="font-size:12px;margin:4px 0 10px">Les clés restent uniquement sur votre téléphone.</div><div style="font-size:11px;margin-bottom:10px">Logos de la Ligue des champions : FootyLogos.com</div><button class="btn" onclick="saveKey()">Enregistrer</button></div>';
 }
 function saveKey(){
  var k=$("ki").value.trim(),f=$("ki2").value.trim();
@@ -312,7 +312,7 @@ function tmForm(arr){
 }
 function drawTeam(){
  var t=TEAMS[TM.id],d=$("tm"),y=d.scrollTop;
- var h='<button class="gear" onclick="closeTeam()" style="color:#5cb82e;font-size:16px">‹ Retour</button><div style="text-align:center"><img src="'+esc(t.logo)+'" alt="" style="width:84px;height:84px;object-fit:contain;background:#fff;border-radius:50%;padding:6px"><h2 style="margin:8px 0">'+esc(t.name)+' <span onclick="togFavT()" style="color:#e3b341">'+(isFavT(TM.id)?"★":"☆")+'</span></h2></div><div class="tabs2">'+[["info","Info"],["matchs","Matchs"],["equipe","Équipe"]].map(function(x){return'<button class="'+(TM.tab==x[0]?"on":"")+'" onclick="setTM(\''+x[0]+'\')">'+x[1]+'</button>'}).join("")+'</div>';
+ var h='<button class="gear" onclick="closeTeam()" style="color:#5cb82e;font-size:16px">‹ Retour</button><div style="text-align:center"><img src="'+esc(t.logo)+'" alt="" style="width:84px;height:84px;object-fit:contain"><h2 style="margin:8px 0">'+esc(t.name)+' <span onclick="togFavT()" style="color:#e3b341">'+(isFavT(TM.id)?"★":"☆")+'</span></h2></div><div class="tabs2">'+[["info","Info"],["matchs","Matchs"],["equipe","Équipe"]].map(function(x){return'<button class="'+(TM.tab==x[0]?"on":"")+'" onclick="setTM(\''+x[0]+'\')">'+x[1]+'</button>'}).join("")+'</div>';
  if(TM.tab=="equipe"){
   if(TM.squad===undefined){loadSquad();h+='<div class="msg">Chargement…</div>'}
   else if(TM.squad===null)h+='<div class="msg">Chargement…</div>';
