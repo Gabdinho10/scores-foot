@@ -67,10 +67,11 @@ select{width:100%;padding:11px;border-radius:10px;border:1px solid #454545;backg
 .pr img.pf{width:36px;height:36px;border-radius:50%;object-fit:cover;background:#fff;flex:none}
 .stt{display:flex;justify-content:space-around;text-align:center;padding:12px 0}.stt b{display:block;font-size:20px}.stt small{color:#a8a8a8;font-size:11px}
 .t{font-size:13px;gap:6px}.t span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.sc{min-width:54px}
+.sec{padding:16px 12px 2px;font-size:13px;font-weight:800;color:#5cb82e;letter-spacing:.5px;text-transform:uppercase}.lg.hot{color:#f0f0f0;font-weight:700;border-left:4px solid #5cb82e;background:#2e2e2e;margin:10px 0 4px;padding-left:8px}
 </style>
 </head>
 <body>
-<header><h1>⚽ Scores Foot <small style="font-size:11px;color:#a8a8a8;font-weight:400">v23</small></h1><button class="gear" onclick="askKey()">⚙️</button></header>
+<header><h1>⚽ Scores Foot <small style="font-size:11px;color:#a8a8a8;font-weight:400">v25</small></h1><button class="gear" onclick="askKey()">⚙️</button></header>
 <div id="qt" style="font-size:11px;color:#a8a8a8;padding:0 14px"></div>
 <div id="ch"></div>
 <div id="dn" class="dn"></div>
@@ -89,6 +90,11 @@ function getKey(){try{return localStorage.getItem("apikey")||DEFAULT_KEY}catch(e
 function setKey(k){try{localStorage.setItem("apikey",k)}catch(e){window._k=k}}
 function ymd(d){var z=function(n){return String(n).padStart(2,"0")};return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate())}
 
+function frErr(m){
+ if(/do not have access to this season/i.test(m))return"Votre plan gratuit API-Football n’autorise pas cette fonction pour la saison actuelle (classements, calendriers complets, buteurs, stats de joueurs). Restent disponibles : les matchs du jour, le direct et la page d’un match.";
+ if(/request limit|rate limit/i.test(m))return"Limite de requêtes API-Football atteinte pour aujourd’hui. Revenez demain ou passez à un plan payant.";
+ return m;
+}
 var QT=null,STALE=false,qtimer=null;
 function showQ(){var el=$("qt");if(el)el.textContent=(QT?"API : "+QT+" requêtes aujourd’hui":"")+(STALE?" · données en cache":"")}
 function quota(){clearTimeout(qtimer);qtimer=setTimeout(async function(){try{var r=await fetch(BASE+"/status",{headers:{"x-apisports-key":getKey()}}),j=await r.json(),q=j.response&&j.response.requests;if(q){QT=q.current+"/"+q.limit_day;showQ()}}catch(e){}},800)}
@@ -102,7 +108,7 @@ async function api(path,params,ttl){
   var r=await fetch(url,{headers:{"x-apisports-key":key}});
   if(!r.ok) throw new Error("Erreur réseau "+r.status);
   var j=await r.json(), e=j.errors;
-  if(e&&(Array.isArray(e)?e.length:Object.keys(e).length)) throw new Error(Object.values(e).join(" "));
+  if(e&&(Array.isArray(e)?e.length:Object.keys(e).length)) throw new Error(frErr(Object.values(e).join(" ")));
   cache[url]={t:Date.now(),d:j.response};
   if(ttl>=600000){try{localStorage.setItem(pk,JSON.stringify(cache[url]))}catch(x){}}
   STALE=false;quota();return j.response;
@@ -410,7 +416,7 @@ async function openUcl(uid){
  var d=$("det"),bk='<button class="gear" onclick="closeDet()" style="color:#5cb82e;font-size:16px">‹ Retour</button>';
  d.style.display="block";bringTop(d);d.scrollTop=0;d.innerHTML=bk+'<div class="msg">Recherche du match…</div>';
  try{
-  var r=await api("fixtures",{league:2,season:2026,timezone:TZ},21600000),hk=UCLK[u.hi],ak=UCLK[u.ai];
+  var r=await api("fixtures",{date:ymd(new Date(u.fixture.timestamp*1000)),timezone:TZ},21600000),hk=UCLK[u.hi],ak=UCLK[u.ai];
   var f=r.filter(function(x){return Math.abs(x.fixture.timestamp-u.fixture.timestamp)<3600&&nrm(x.teams.home.name).indexOf(hk)>=0&&nrm(x.teams.away.name).indexOf(ak)>=0})[0];
   if(f){F[f.fixture.id]=f;detail(f.fixture.id)}
   else d.innerHTML=bk+'<div class="msg">Les détails de ce match ne sont pas encore disponibles dans API-Football.</div>';
@@ -425,6 +431,18 @@ function uclMatches(){
  return out;
 }
 
+var PRIOC=["England","Germany","Spain","France","Italy","Russia","Netherlands","Portugal","Turkey","Belgium","Norway","Saudi-Arabia","Greece","Switzerland","Austria"];
+var TOPID={England:39,Germany:78,Spain:140,France:61,Italy:135,Russia:235,Netherlands:88,Portugal:94,Turkey:203,Belgium:144,Norway:103,"Saudi-Arabia":307,Greece:197,Switzerland:207,Austria:218};
+var TOPNM=/^(premier league|bundesliga|la liga|ligue 1|serie a|eredivisie|primeira liga|super lig|jupiler pro league|pro league|eliteserien|super league 1|super league|premier liga|saudi pro league)$/i;
+var OTHERC=["USA","Mexico","Brazil","Argentina","Scotland","Denmark","Sweden","Ukraine","Czech-Republic","Poland","Egypt","Morocco","Algeria","Tunisia","Senegal","Japan","South-Korea"];
+function prio(s){
+ var n=s.n||"",c=s.c||"";
+ if(INTL.test(n)&&!NOTINTL.test(n)&&(c=="World"||/africa|europe/i.test(c)))return 0;
+ if(c=="World"&&/champions league|europa|conference|youth league|super cup|libertadores|sudamericana|caf /i.test(n))return 1;
+ var i=PRIOC.indexOf(c);
+ if(i>=0)return(s.id==TOPID[c]||(TOPNM.test(n)))?2+i/100:3+i/100;
+ return OTHERC.indexOf(c)>=0?4:5;
+}
 function setFlt(v){flt=v;lgf="all";render(LAST)}
 function setLg(v){lgf=v;render(LAST)}
 function render(list){
@@ -445,10 +463,14 @@ function render(list){
  var L2=lgf=="all"?base:base.filter(function(f){return String(f.league.id)==lgf});
  if(!L2.length){$("v").innerHTML='<div class="msg">Aucun match pour ce choix.</div>';return}
  var g={};
- L2.forEach(function(f){F[f.fixture.id]=f;var l=f.league;(g[l.id]=g[l.id]||{t:l.country+" · "+l.name,logo:l.logo,d:[]}).d.push(f)});
+ L2.forEach(function(f){F[f.fixture.id]=f;var l=f.league;(g[l.id]=g[l.id]||{t:l.country+" · "+l.name,logo:l.logo,d:[],id:l.id,c:l.country,n:l.name}).d.push(f)});
  var h="";
- Object.keys(g).map(function(k){return g[k]}).sort(function(a,b){return a.t.localeCompare(b.t)}).forEach(function(s){
-  h+='<div class="lg"><img src="'+esc(s.logo)+'" alt="">'+esc(s.t)+'</div>';
+ var shH=false,shO=false;
+ Object.keys(g).map(function(k){return g[k]}).sort(function(a,b){return prio(a)-prio(b)||a.t.localeCompare(b.t)}).forEach(function(s){
+  var hot=prio(s)<3;
+  if(hot&&!shH){h+='<div class="sec">⭐ Compétitions majeures</div>';shH=true}
+  if(!hot&&shH&&!shO){h+='<div class="sec">Autres compétitions</div>';shO=true}
+  h+='<div class="lg'+(hot?' hot':'')+'"><img src="'+esc(s.logo)+'" alt="">'+esc(s.t)+'</div>';
   s.d.forEach(function(f){
    h+=rowHtml(f);
   });
