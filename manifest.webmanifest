@@ -1,13 +1,13 @@
 {
-  "name": "Scores Foot",
-  "short_name": "Scores Foot",
+  "name": "SCORES FOOT",
+  "short_name": "SCORES FOOT",
   "description": "Scores en direct, classements et pronostics",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#232323",
-  "theme_color": "#232323",
+  "background_color": "#090d0b",
+  "theme_color": "#090d0b",
   "lang": "fr",
   "icons": [
     {
