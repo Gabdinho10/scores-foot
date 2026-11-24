@@ -205,8 +205,8 @@ function go(t){
 function shift(n){date=new Date(date.getFullYear(),date.getMonth(),date.getDate()+n);load()}
 
 async function load(){
- if(!getKey()){askKey();return}
  if(tab=="explore"||tab=="fav"){$("dn").innerHTML="";$("fl").innerHTML="";explore();return}
+ if(!getKey()){askKey();return}
  $("dn").innerHTML=tab=="live"?"":dayBar();
  $("fl").innerHTML="";$("v").innerHTML='<div class="msg">Chargement…</div>';
  try{
