@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#232323">
+<meta name="theme-color" content="#090d0b">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Scores Foot</title>
+<title>SCORES FOOT — Le football en direct</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#232323;color:#f0f0f0;font:15px/1.4 system-ui,sans-serif;padding-bottom:70px}
@@ -68,17 +68,88 @@ select{width:100%;padding:11px;border-radius:10px;border:1px solid #454545;backg
 .stt{display:flex;justify-content:space-around;text-align:center;padding:12px 0}.stt b{display:block;font-size:20px}.stt small{color:#a8a8a8;font-size:11px}
 .t{font-size:13px;gap:6px}.t span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.sc{min-width:54px}
 .sec{padding:16px 12px 2px;font-size:13px;font-weight:800;color:#5cb82e;letter-spacing:.5px;text-transform:uppercase}.lg.hot{color:#f0f0f0;font-weight:700;border-left:4px solid #5cb82e;background:#2e2e2e;margin:10px 0 4px;padding-left:8px}
+
+/* SCORES FOOT — nouvelle identité visuelle dark */
+:root{color-scheme:dark;--bg:#090d0b;--surface:#111915;--surface2:#17221c;--line:#26352c;--muted:#8fa196;--text:#f3f7f4;--green:#a3f35b;--green2:#70d52c}
+html{background:var(--bg);scroll-behavior:smooth}
+body{background:radial-gradient(ellipse at 50% -15%,#1b3422 0%,var(--bg) 48%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:0 0 calc(88px + env(safe-area-inset-bottom));max-width:100%;overflow-x:hidden}
+header{position:sticky;top:0;z-index:8;padding:15px 16px 12px;background:rgba(9,13,11,.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(163,243,91,.10)}
+header h1{display:flex;align-items:center;gap:9px;font-size:17px;letter-spacing:.7px;font-weight:900;text-transform:uppercase}
+header h1:before{content:"⚽";display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:linear-gradient(145deg,#c3ff83,#63c82b);color:#10200b;font-size:19px;box-shadow:0 5px 20px #70d52c35}
+header h1 small{font-size:9px!important;color:var(--green)!important;background:#1b2a1e;padding:4px 6px;border-radius:6px}
+.gear{color:var(--green)!important;background:var(--surface2);border:1px solid var(--line);border-radius:12px;width:40px;height:40px;cursor:pointer}
+#homeHero{margin:17px 14px 12px;padding:19px 17px 16px;border:1px solid #31472f;border-radius:20px;background:linear-gradient(125deg,rgba(42,76,39,.92),rgba(18,33,24,.96) 58%,rgba(13,23,18,.98));position:relative;overflow:hidden;box-shadow:0 12px 34px #0005}
+#homeHero:after{content:"⚽";position:absolute;right:-12px;top:-22px;font-size:118px;opacity:.075;transform:rotate(-18deg);pointer-events:none}
+#homeHero .eyebrow{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#c5f5a2;font-weight:800}
+#homeHero h2{font-size:25px;line-height:1.08;margin:9px 0 7px;max-width:260px;font-weight:900;letter-spacing:-.8px}
+#homeHero p{font-size:12px;color:#c0d0c3;margin:0;max-width:260px}
+#homeHero .heroPill{display:inline-flex;align-items:center;gap:6px;margin-top:15px;padding:7px 10px;border:1px solid #a3f35b55;border-radius:99px;background:#a3f35b16;color:#d8ffc0;font-size:10px;font-weight:800;letter-spacing:.5px}
+#qt{padding:4px 16px 8px!important;color:var(--muted)!important;font-size:10px!important}
+#ch{padding:0 14px}
+#dn{padding:9px 14px;color:var(--text)}
+#fl{padding:0 14px!important}
+#fl select,select{background:#131d17;border:1px solid var(--line);border-radius:12px;color:var(--text);outline:none}
+.sec{padding:18px 14px 8px;color:var(--green);font-size:10px;letter-spacing:1.5px}
+.lg{padding:13px 14px 8px;color:#b5c4b8;font-size:10px;letter-spacing:.65px}
+.lg.hot{margin:13px 12px 5px;padding:10px 12px;background:#132019;border-left:3px solid var(--green);border-radius:9px;color:#e9f4e9}
+.m{background:linear-gradient(145deg,#17221b,#111814);border:1px solid #25352a;margin:0 12px 8px;border-radius:15px;padding:13px;box-shadow:0 5px 15px #0002;cursor:pointer;transition:transform .15s,border-color .15s}
+.m:active{transform:scale(.985);border-color:#7bd83d}
+.t{font-size:13px;color:#edf4ee}
+.t img{width:27px;height:27px}
+.sc{font-size:19px;color:#fff}
+.st{color:#91a296;font-size:10px}
+.st.lv{color:#ff786d}
+.msg{color:var(--muted);padding:25px 18px}
+.card{background:#131d17;border:1px solid var(--line);border-radius:15px}
+input,select{background:#121b16!important;border:1px solid var(--line)!important;color:var(--text)!important;border-radius:12px!important}
+.btn{background:linear-gradient(135deg,#b7ff7c,#78d83a);color:#10200b;border-radius:12px;box-shadow:0 5px 18px #70d52c22}
+.sg button,.ds button,.tabs2 button{background:#152019;border:1px solid #29392e;color:#9fb0a3;border-radius:11px}
+.sg button.on,.ds button.on,.tabs2 button.on{background:#a3f35b;color:#12200d;border-color:#a3f35b}
+.lc,.pl{background:#131d17;border-bottom:1px solid var(--line);border-radius:12px;margin:5px 12px}
+.tabs{position:fixed;bottom:0;left:0;right:0;z-index:20;display:flex;justify-content:space-around;gap:2px;padding:8px 7px calc(8px + env(safe-area-inset-bottom));background:rgba(10,15,12,.96);backdrop-filter:blur(18px);border-top:1px solid #26372b;box-shadow:0 -8px 28px #0005}
+.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:7px 2px;background:transparent;border:0;border-radius:12px;color:#829187;font-size:10px;font-weight:700;letter-spacing:.1px}
+.tabs button.on{background:#1a2a1d;color:var(--green)}
+#det,#tm,#pp{background:var(--bg);color:var(--text);padding:14px}
+#det .big{background:linear-gradient(145deg,#142019,#0e1511);border:1px solid var(--line);border-radius:18px;padding:18px 8px}
+#det .big img{width:54px;height:54px}
+#det .big b{font-size:12px}
+#det .tabs2{position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:2}
+#det .tabs2 button{font-size:11px}
+#det .card{padding:14px}
+#det .mk{border-color:var(--line)}
+#det .ev{border-color:var(--line)}
+#det .sub{color:var(--green)}
+#det .stt{border-bottom:1px solid var(--line)}
+#det .bar{background:#29372d}
+#det .sr{border-color:var(--line)}
+#det .tr,#det .cl{background:#142019;border-color:var(--line)}
+#det .tr.hd,#det .cl.hd{background:transparent}
+#det .pr{background:transparent;border-color:var(--line)}
+#det .fg div{background:#142019}
+@media(min-width:700px){body{max-width:760px;margin:0 auto;border-left:1px solid #17251b;border-right:1px solid #17251b;min-height:100vh}header{padding-left:22px;padding-right:22px}#homeHero{margin:22px 20px 15px;padding:25px 24px}#homeHero h2{font-size:30px}#ch{padding:0 20px}#dn{padding-left:20px;padding-right:20px}#fl{padding:0 20px!important}.m{margin-left:18px;margin-right:18px}.tabs{left:50%;right:auto;transform:translateX(-50%);width:min(760px,100%);padding-left:18px;padding-right:18px}}
+
 </style>
 </head>
 <body>
-<header><h1>⚽ Scores Foot <small style="font-size:11px;color:#a8a8a8;font-weight:400">v25</small></h1><button class="gear" onclick="askKey()">⚙️</button></header>
+<header><h1>SCORES FOOT <small>LIVE</small></h1><button class="gear" aria-label="Paramètres API" onclick="askKey()">⚙</button></header>
+<section id="homeHero" aria-label="Bienvenue sur Scores Foot">
+  <div class="eyebrow">LE FOOTBALL EN TEMPS RÉEL</div>
+  <h2>Chaque match.<br>Chaque émotion.</h2>
+  <p>Suivez les scores, les grandes compétitions et vos équipes favorites.</p>
+  <div class="heroPill"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#a3f35b;box-shadow:0 0 9px #a3f35b"></span> CENTRE DU FOOTBALL</div>
+</section>
 <div id="qt" style="font-size:11px;color:#a8a8a8;padding:0 14px"></div>
 <div id="ch"></div>
 <div id="dn" class="dn"></div>
 <div id="fl" style="padding:0 12px"></div>
 <div id="v"></div>
 <div id="det"></div><div id="tm"></div><div id="pp"></div>
-<div class="tabs"><button id="t_results" onclick="go('results')">⚽ Matchs</button><button id="t_live" onclick="go('live')">🔴 Direct</button><button id="t_explore" onclick="go('explore')">🔍 Explorer</button><button id="t_fav" onclick="go('fav')">⭐ Favoris</button></div>
+<nav class="tabs" aria-label="Navigation principale">
+<button id="t_results" onclick="go('results')"><span style="font-size:17px">▦</span><span>Matchs</span></button>
+<button id="t_live" onclick="go('live')"><span style="font-size:17px">◉</span><span>Direct</span></button>
+<button id="t_explore" onclick="go('explore')"><span style="font-size:17px">⌕</span><span>Explorer</span></button>
+<button id="t_fav" onclick="go('fav')"><span style="font-size:17px">☆</span><span>Favoris</span></button>
+</nav>
 <script src="ucl.js"></script>
 <script>
 var DEFAULT_KEY="";
