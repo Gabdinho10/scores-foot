@@ -126,7 +126,7 @@ input,select{background:#121b16!important;border:1px solid var(--line)!important
 #det .tr.hd,#det .cl.hd{background:transparent}
 #det .pr{background:transparent;border-color:var(--line)}
 #det .fg div{background:#142019}
-@media(min-width:700px){body{max-width:760px;margin:0 auto;border-left:1px solid #17251b;border-right:1px solid #17251b;min-height:100vh}header{padding-left:22px;padding-right:22px}#homeHero{margin:22px 20px 15px;padding:25px 24px}#homeHero h2{font-size:30px}#ch{padding:0 20px}#dn{padding-left:20px;padding-right:20px}#fl{padding:0 20px!important}.m{margin-left:18px;margin-right:18px}.tabs{left:50%;right:auto;transform:translateX(-50%);width:min(760px,100%);padding-left:18px;padding-right:18px}}
+.anGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 12px}.anMetric{padding:12px;min-width:0}.anMetric small{display:block;color:var(--muted);font-size:11px}.anMetric b{display:block;font-size:23px;margin:4px 0;color:var(--text)}.anMetric span{display:block;color:var(--muted);font-size:10px}.anForm{display:flex;gap:6px;flex-wrap:wrap}.anForm span{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:12px}@media(min-width:700px){body{max-width:760px;margin:0 auto;border-left:1px solid #17251b;border-right:1px solid #17251b;min-height:100vh}header{padding-left:22px;padding-right:22px}#homeHero{margin:22px 20px 15px;padding:25px 24px}#homeHero h2{font-size:30px}#ch{padding:0 20px}#dn{padding-left:20px;padding-right:20px}#fl{padding:0 20px!important}.m{margin-left:18px;margin-right:18px}.tabs{left:50%;right:auto;transform:translateX(-50%);width:min(760px,100%);padding-left:18px;padding-right:18px}}
 
 </style>
 </head>
@@ -371,7 +371,7 @@ function openTeam(id){
 function closeTeam(){$("tm").style.display="none"}
 function setTM(t){TM.tab=t;drawTeam()}
 async function loadTM(){
- try{var a=await api("fixtures",{team:TM.id,last:5,timezone:TZ},600000),b=await api("fixtures",{team:TM.id,next:5,timezone:TZ},600000);
+ try{var a=await api("fixtures",{team:TM.id,last:10,timezone:TZ},600000),b=await api("fixtures",{team:TM.id,next:5,timezone:TZ},600000);
   TM.last=a.sort(function(x,y){return x.fixture.timestamp-y.fixture.timestamp});TM.next=b.sort(function(x,y){return x.fixture.timestamp-y.fixture.timestamp});
   TM.last.concat(TM.next).forEach(function(f){F[f.fixture.id]=f;regT(f.teams.home,f.league.season);regT(f.teams.away,f.league.season)});
  }catch(e){TM.err=e.message;TM.last=[];TM.next=[]}
@@ -388,9 +388,28 @@ function tmForm(arr){
   return'<div style="border-top:4px solid '+c+'"><img src="'+esc(o.logo)+'" alt=""><b>'+f.goals.home+' - '+f.goals.away+'</b><br><small style="color:#a8a8a8">'+new Date(f.fixture.date).toLocaleDateString([],{day:"numeric",month:"short"})+'</small></div>';
  }).join("")+'</div></div>';
 }
+function teamAnalysis(){
+ var all=(TM.last||[]).filter(function(f){return f.goals&&f.goals.home!==null&&f.goals.away!==null&&["FT","AET","PEN","AWD","WO"].indexOf(f.fixture.status.short)>=0});
+ if(!all.length)return '<div class="msg">Les résultats nécessaires à l’analyse ne sont pas encore disponibles.</div>';
+ var w=0,d=0,l=0,gf=0,ga=0,cs=0,btts=0,home={w:0,d:0,l:0,gf:0,ga:0,n:0},away={w:0,d:0,l:0,gf:0,ga:0,n:0},form=[];
+ all.forEach(function(f){
+  var isHome=f.teams.home.id==TM.id,ours=Number(isHome?f.goals.home:f.goals.away),theirs=Number(isHome?f.goals.away:f.goals.home),side=isHome?home:away;
+  gf+=ours;ga+=theirs;side.n++;side.gf+=ours;side.ga+=theirs;
+  if(ours>theirs){w++;side.w++;form.push("V")}
+  else if(ours==theirs){d++;side.d++;form.push("N")}
+  else{l++;side.l++;form.push("D")}
+  if(theirs===0)cs++;
+  if(ours>0&&theirs>0)btts++;
+ });
+ var n=all.length,rate=function(x){return Math.round(x/n*100)},metric=function(label,val,sub){return '<div class="card anMetric"><small>'+label+'</small><b>'+val+'</b><span>'+sub+'</span></div>'};
+ function sideCard(label,s){
+  return '<div class="card" style="padding:12px"><h3>'+label+' · '+s.n+' matchs</h3><div class="stt"><div><b>'+s.w+'</b><small>Victoires</small></div><div><b>'+s.d+'</b><small>Nuls</small></div><div><b>'+s.l+'</b><small>Défaites</small></div></div><div class="lab"><span>Buts marqués</span><b>'+s.gf+'</b></div><div class="lab"><span>Buts encaissés</span><b>'+s.ga+'</b></div></div>';
+ }
+ return '<div class="lg">Bilan des '+n+' derniers matchs</div><div class="anGrid">'+metric("Victoires",w,rate(w)+" % des matchs")+metric("Matchs nuls",d,rate(d)+" % des matchs")+metric("Défaites",l,rate(l)+" % des matchs")+metric("Buts marqués",gf,(gf/n).toFixed(2)+" par match")+metric("Buts encaissés",ga,(ga/n).toFixed(2)+" par match")+metric("Différence de buts",(gf-ga)>0?"+"+(gf-ga):(gf-ga),"sur la période")+metric("Clean sheets",cs,rate(cs)+" % sans encaisser")+metric("Les deux marquent",btts,rate(btts)+" % des matchs")+'</div><div class="card" style="padding:12px;margin:10px 12px"><h3>Forme récente · du plus ancien au plus récent</h3><div class="anForm">'+form.map(function(x){var col=x=="V"?"#159b68":x=="N"?"#c08d24":"#d9534f";return '<span style="background:'+col+'">'+x+'</span>'}).join("")+'</div><div class="lab" style="margin-top:8px"><span>V = Victoire · N = Nul · D = Défaite</span><span>'+n+' matchs</span></div></div>'+sideCard("À domicile",home)+sideCard("À l’extérieur",away)+'<div class="msg" style="font-size:11px">Analyse calculée à partir des '+n+' derniers matchs terminés disponibles via API-Football. Les compétitions peuvent être différentes. Ces statistiques décrivent les performances passées et ne garantissent pas les résultats futurs.</div>';
+}
 function drawTeam(){
  var t=TEAMS[TM.id],d=$("tm"),y=d.scrollTop;
- var h='<button class="gear" onclick="closeTeam()" style="color:#5cb82e;font-size:16px">‹ Retour</button><div style="text-align:center"><img src="'+esc(t.logo)+'" alt="" style="width:84px;height:84px;object-fit:contain"><h2 style="margin:8px 0">'+esc(t.name)+' <span onclick="togFavT()" style="color:#e3b341">'+(isFavT(TM.id)?"★":"☆")+'</span></h2></div><div class="tabs2">'+[["info","Info"],["matchs","Matchs"],["equipe","Équipe"]].map(function(x){return'<button class="'+(TM.tab==x[0]?"on":"")+'" onclick="setTM(\''+x[0]+'\')">'+x[1]+'</button>'}).join("")+'</div>';
+ var h='<button class="gear" onclick="closeTeam()" style="color:#5cb82e;font-size:16px">‹ Retour</button><div style="text-align:center"><img src="'+esc(t.logo)+'" alt="" style="width:84px;height:84px;object-fit:contain"><h2 style="margin:8px 0">'+esc(t.name)+' <span onclick="togFavT()" style="color:#e3b341">'+(isFavT(TM.id)?"★":"☆")+'</span></h2></div><div class="tabs2">'+[["info","Info"],["analyse","Analyse"],["matchs","Matchs"],["equipe","Équipe"]].map(function(x){return'<button class="'+(TM.tab==x[0]?"on":"")+'" onclick="setTM(\''+x[0]+'\')">'+x[1]+'</button>'}).join("")+'</div>';
  if(TM.tab=="equipe"){
   if(TM.squad===undefined){loadSquad();h+='<div class="msg">Chargement…</div>'}
   else if(TM.squad===null)h+='<div class="msg">Chargement…</div>';
@@ -401,7 +420,8 @@ function drawTeam(){
   }).join("");
  }else if(TM.last===undefined)h+='<div class="msg">Chargement…</div>';
  else if(TM.err&&!TM.last.length)h+='<div class="msg err">'+esc(TM.err)+'</div>';
- else if(TM.tab=="matchs")h+='<div class="lg">Derniers matchs</div>'+TM.last.map(function(f){return rowHtml(f,true)}).join("")+'<div class="lg">Prochains matchs</div>'+TM.next.map(function(f){return rowHtml(f,true)}).join("");
+ else if(TM.tab=="analyse")h+=teamAnalysis();
+ else if(TM.tab=="matchs")h+='<div class="lg">10 derniers matchs</div>'+TM.last.map(function(f){return rowHtml(f,true)}).join("")+'<div class="lg">Prochains matchs</div>'+TM.next.map(function(f){return rowHtml(f,true)}).join("");
  else{
   var l=TM.last[TM.last.length-1],n=TM.next[0];
   h+=(l?'<div class="lg">Dernier match</div>'+rowHtml(l,true):"")+(n?'<div class="lg">Prochain match</div>'+rowHtml(n,true):"")+(TM.last.length?tmForm(TM.last):"");
