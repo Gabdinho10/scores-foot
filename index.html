@@ -582,6 +582,21 @@ async function loadFx(){
  try{var r=await api("fixtures",{id:DT.id},30000);DT.fx=r[0]||false;DT.err=null}catch(e){DT.err=e.message}
  drawDet();
 }
+
+async function loadH2H(){
+ DT.h2h=null;var id=DT.id,home=DT.f.teams.home.id,away=DT.f.teams.away.id;
+ try{var r=await api("fixtures",{h2h:home+"-"+away,last:10},3600000);if(DT.id!==id)return;DT.h2h=r||[];DT.h2herr=null}catch(e){if(DT.id!==id)return;DT.h2h=false;DT.h2herr=e.message}
+ drawDet();
+}
+function h2hHtml(){
+ var a=DT.h2h||[],f=DT.f,home=f.teams.home.id,away=f.teams.away.id,w=0,d=0,l=0;
+ a.forEach(function(x){if(!x.goals||x.goals.home==null||x.goals.away==null)return;var ih=x.teams.home.id==home,ours=Number(ih?x.goals.home:x.goals.away),theirs=Number(ih?x.goals.away:x.goals.home);if(ours>theirs)w++;else if(ours==theirs)d++;else l++});
+ var h='<div class="lg">10 dernières confrontations disponibles</div><div class="anGrid"><div class="card anMetric"><small>Victoires de '+esc(f.teams.home.name)+'</small><b>'+w+'</b></div><div class="card anMetric"><small>Matchs nuls</small><b>'+d+'</b></div><div class="card anMetric"><small>Victoires de '+esc(f.teams.away.name)+'</small><b>'+l+'</b></div></div>';
+ if(!a.length)return h+'<div class="msg">Aucune confrontation directe disponible.</div>';
+ h+=a.map(function(x){var date=new Date(x.fixture.date).toLocaleDateString([],{day:"numeric",month:"short",year:"numeric"}),sc=x.goals&&x.goals.home!=null?x.goals.home+" - "+x.goals.away:"—";return '<div class="m"><div class="lab"><span>'+esc(x.league&&x.league.name||"Compétition")+'</span><span>'+esc(date)+'</span></div><div class="r"><div class="t"><img src="'+esc(x.teams.home.logo)+'" alt=""><span>'+esc(x.teams.home.name)+'</span></div><div class="sc">'+esc(sc)+'</div><div class="t a"><span>'+esc(x.teams.away.name)+'</span><img src="'+esc(x.teams.away.logo)+'" alt=""></div></div></div>'}).join("");
+ return h+'<div class="msg" style="font-size:11px">Historique fourni par API-Football. Le nombre de rencontres dépend des données disponibles.</div>';
+}
+
 async function loadPred(){
  DT.pred=null;
  try{var r=await api("predictions",{fixture:DT.id},600000);DT.pred=r[0]||false}catch(e){DT.pred=false;DT.err=e.message}
@@ -658,8 +673,13 @@ function drawDet(){
  var stx=live?(st.short=="HT"?"MT":(st.elapsed||"")+"'"):st.short=="FT"?"Terminé":(st.short=="NS"||st.short=="TBD")?new Date(f.fixture.date).toLocaleString([],{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):st.short;
  var h='<button class="gear" onclick="closeDet()" style="color:#5cb82e;font-size:16px">‹ Retour</button><div class="big"><div onclick="openTeam('+f.teams.home.id+')"><img src="'+esc(f.teams.home.logo)+'" alt=""><br><b>'+esc(f.teams.home.name)+'</b></div><div onclick="openTeam('+f.teams.away.id+')"><img src="'+esc(f.teams.away.logo)+'" alt=""><br><b>'+esc(f.teams.away.name)+'</b></div></div>';
  if(sh)h+='<div style="text-align:center;font-size:30px;font-weight:800">'+g.home+" - "+g.away+'</div>';
- h+='<div class="st'+(live?" lv":"")+'" style="margin-bottom:6px">'+esc(stx)+'</div><div class="tabs2">'+[["match","Match"],["stats","Stats"],["compo","Compos"],["table","Classement"],["analyse","Analyse"]].map(function(x){return'<button class="'+(DT.tab==x[0]?"on":"")+'" onclick="setTab(\''+x[0]+'\')">'+x[1]+'</button>'}).join("")+'</div>';
- if(DT.tab=="analyse"){
+ h+='<div class="st'+(live?" lv":"")+'" style="margin-bottom:6px">'+esc(stx)+'</div><div class="tabs2">'+[["match","Match"],["stats","Stats"],["compo","Compos"],["table","Classement"],["h2h","H2H"],["analyse","Analyse"]].map(function(x){return'<button class="'+(DT.tab==x[0]?"on":"")+'" onclick="setTab(\''+x[0]+'\')">'+x[1]+'</button>'}).join("")+'</div>';
+ if(DT.tab=="h2h"){
+  if(DT.h2h===undefined){loadH2H();h+='<div class="msg">Chargement des confrontations…</div>'}
+  else if(DT.h2h===null)h+='<div class="msg">Chargement des confrontations…</div>';
+  else if(DT.h2h===false)h+='<div class="msg err">'+esc(DT.h2herr||"Historique indisponible.")+'</div>';
+  else h+=h2hHtml();
+ }else if(DT.tab=="analyse"){
   if(DT.pred===undefined){loadPred();h+='<div class="msg">Analyse en cours…</div>'}
   else if(DT.pred===null)h+='<div class="msg">Analyse en cours…</div>';
   else if(DT.pred===false)h+='<div class="msg'+(DT.err?" err":"")+'">'+esc(DT.err||"Pas de prédiction pour ce match.")+'</div>';
