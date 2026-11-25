@@ -106,8 +106,8 @@ input,select{background:#121b16!important;border:1px solid var(--line)!important
 .sg button,.ds button,.tabs2 button{background:#152019;border:1px solid #29392e;color:#9fb0a3;border-radius:11px}
 .sg button.on,.ds button.on,.tabs2 button.on{background:#a3f35b;color:#12200d;border-color:#a3f35b}
 .lc,.pl{background:#131d17;border-bottom:1px solid var(--line);border-radius:12px;margin:5px 12px}
-.tabs{position:fixed;bottom:0;left:0;right:0;z-index:20;display:flex;justify-content:space-around;gap:2px;padding:8px 7px calc(8px + env(safe-area-inset-bottom));background:rgba(10,15,12,.96);backdrop-filter:blur(18px);border-top:1px solid #26372b;box-shadow:0 -8px 28px #0005}
-.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:7px 2px;background:transparent;border:0;border-radius:12px;color:#829187;font-size:10px;font-weight:700;letter-spacing:.1px}
+.tabs{position:fixed;bottom:0;left:0;right:0;z-index:99999;pointer-events:auto;display:flex;justify-content:space-around;gap:2px;padding:8px 7px calc(8px + env(safe-area-inset-bottom));background:rgba(10,15,12,.96);backdrop-filter:blur(18px);border-top:1px solid #26372b;box-shadow:0 -8px 28px #0005}
+.tabs button{pointer-events:auto;touch-action:manipulation;cursor:pointer;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:7px 2px;background:transparent;border:0;border-radius:12px;color:#829187;font-size:10px;font-weight:700;letter-spacing:.1px}
 .tabs button.on{background:#1a2a1d;color:var(--green)}
 #det,#tm,#pp{background:var(--bg);color:var(--text);padding:14px}
 #det .big{background:linear-gradient(145deg,#142019,#0e1511);border:1px solid var(--line);border-radius:18px;padding:18px 8px}
@@ -145,10 +145,10 @@ input,select{background:#121b16!important;border:1px solid var(--line)!important
 <div id="v"></div>
 <div id="det"></div><div id="tm"></div><div id="pp"></div>
 <nav class="tabs" aria-label="Navigation principale">
-<button id="t_results" onclick="go('results')"><span style="font-size:17px">▦</span><span>Matchs</span></button>
-<button id="t_live" onclick="go('live')"><span style="font-size:17px">◉</span><span>Direct</span></button>
-<button id="t_explore" onclick="go('explore')"><span style="font-size:17px">⌕</span><span>Explorer</span></button>
-<button id="t_fav" onclick="go('fav')"><span style="font-size:17px">☆</span><span>Favoris</span></button>
+<button type="button" id="t_results" data-tab="results"><span style="font-size:17px">▦</span><span>Matchs</span></button>
+<button type="button" id="t_live" data-tab="live"><span style="font-size:17px">◉</span><span>Direct</span></button>
+<button type="button" id="t_explore" data-tab="explore"><span style="font-size:17px">⌕</span><span>Explorer</span></button>
+<button type="button" id="t_fav" data-tab="fav"><span style="font-size:17px">☆</span><span>Favoris</span></button>
 </nav>
 <script src="ucl.js"></script>
 <script>
@@ -724,6 +724,7 @@ function analyse(p,f){
  return'<div class="card"><h3>Analyse des marchés (estimation)</h3>'+h+'<div class="lab" style="margin-top:10px">Basée sur les moyennes de buts des deux équipes (modèle de Poisson). Ce sont des estimations, pas des certitudes. Tirs, fautes et corners : pas encore disponibles.</div></div>';
 }
 function closeDet(){clearInterval(DT.timer);$("det").style.display="none"}
+document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".tabs button[data-tab]");if(!b)return;e.preventDefault();e.stopPropagation();try{go(b.getAttribute("data-tab"))}catch(err){$("v").innerHTML='<div class="msg err">Erreur de navigation : '+esc(err&&err.message||err)+'</div>'}} ,true);
 try{if("serviceWorker" in navigator&&location.protocol.indexOf("http")==0)navigator.serviceWorker.register("sw.js")}catch(e){}
 quota();
 go("results");
